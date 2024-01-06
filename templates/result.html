@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block title %}Result{% endblock %}
+
+{% block main %}
+    <div class="container mx-auto">
+        <p>Results publish after 1 day of event creation</p>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center">Event Title</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rows in lst %}
+                    {% if rows.date != td %}
+                        <tr class="table-success">
+                            <td class="text-center"><a href="/result/{{ rows.events }}">{{ rows.events }}</a></td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,7 @@
+    cmd = f"SELECT * FROM {var}"
+    data = cr.execute(cmd)
+    with open('db.csv', 'w', newline='') as f:
+        fieldnames = ['user', 'pref1', 'pref2', 'pref3']
+        writer = csv.writer(f)
+        writer.writerow(fieldnames)
+        writer.writerows(data)

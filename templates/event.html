@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ var }}{% endblock %}
+
+{% block main %}
+    {% if session["events"] == var %}
+        <h1>{{var}}</h1>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <legend>Candidates</legend>
+                </div>
+                <div class="col">
+                    <div class="p-3 border bg-light">Preferences <p class="text-danger">Choose indifferent Candidates</p></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col m-3">
+                    <table class="table">
+                        <tbody>
+                            {% for row in rows %}
+                                <tr>
+                                    <td>{{ row.user }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col m-1">
+                    <form action="/dew/{{var}}" method="post">
+                        <div class="form-group">
+                            <label for="select1" class="form-label mt-4">pref1</label>
+                            <select name="select1" class="form-select">
+                                <option disabled selected>Select</option>
+                                {% for row in rows %}
+                                    <option value="{{ row.id }}">{{ row.user }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="select2" class="form-label mt-4">pref2</label>
+                            <select class="form-select" name="select2">
+                                <option disabled selected>Select</option>
+                                {% for row in rows %}
+                                    <option value="{{ row.id }}" >{{ row.user }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="select3" class="form-label mt-4">pref3</label>
+                            <select class="form-select" name="select3">
+                                <option disabled selected>Select</option>
+                                {% for row in rows %}
+                                    <option value="{{ row.id }}">{{ row.user }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mt-3"><button class="btn btn-primary" type="submit">Cast Your Vote</button></div>
+                    </form>    
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <form action="/dew/{{ var }}" method="post">
+            <div class="mb-3">
+                <h3>
+                    {{ var }}
+                    <small class="text-body-secondary">password:</small>
+                </h3>
+            </div>
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" autofocus id="password" name="password" placeholder="Password" type="password">
+            </div>
+            <p>Get your pass from event creator. After submission you will be directed to events page, and access that event from there</p>
+            <button class="btn btn-primary" type="submit">Participate</button>
+        </form>
+    {% endif %}
+{% endblock %}

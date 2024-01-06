@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}Events{% endblock %}
+{% block head %}
+    <script src="/static/jquery.js"></script>
+{% endblock %}
+
+{% block main %}
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="text-start">Event Title</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rows in lst %}
+                    <tr>
+                        <td class="text-start"><a href="/dew/{{ rows.events }}">{{ rows.events }}</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div><button class="btn btn-info btn-sm" onclick="show()">New</button></div>
+
+    <div id="foam">
+        <p>Name must not contain spaces, or start with numbers</p>
+        <form action="/events" method="post">
+            <div class="mb-3">
+                <input 
+                autocomplete="off" 
+                class="form-control mx-auto w-auto" 
+                id="eventName" name="eventName" 
+                placeholder="Event Title" 
+                type="text"
+                onblur="hasSpace()"
+                >
+            </div>
+            <div class="mb-3">
+                <input 
+                class="form-control mx-auto w-auto" 
+                id="password" name="password" 
+                placeholder="Password" 
+                type="password"
+                >
+            </div>
+            <button class="btn btn-primary" type="submit">Create</button>
+        </form>
+    </div>
+    <script src="/static/events.js"></script>
+{% endblock %}
