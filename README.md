@@ -1,4 +1,4 @@
-#DEW: Decentralized Election Watch
+# DEW: Decentralized Election Watch
 
 Do you love *Electoral Authoritarianism*? Of course you do! You live in a country where the *hybrid regime* does so.
 However, here you can elect your skipper with fair voting system - Free (Free as in Freedom), and Transparent (No lies!)
