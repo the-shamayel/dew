@@ -6,7 +6,7 @@ The site uses **Tideman** algorithm to choose between candidates. The philosophy
 
 First, create a voting event, in events page. Choose your preferred three candidates among you. Submit. The results are published in results section after 24 hours [wait till all has cast their votes].
 
-[Get started]()
+[Get started](https://7ff8-103-133-140-142.ngrok-free.app/)
 
 This is a simple personal project I authored in my spare time, with humbling simplicity looks, yet bustier codeblocks in heart. Consider doing PR, I'd be grateful.
 
