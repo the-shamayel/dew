@@ -10,7 +10,5 @@ First, create a voting event, in events page. Choose your preferred three candid
 
 This is a simple personal project I authored in my spare time, with humbling simplicity looks, yet bustier codeblocks in heart. Consider doing PR, I'd be grateful.
 
-Random fact: `For every non-porn webpage, there are five porn pages.`
-
 Made with :heart: from 🇧🇩
 by a non-CS, average oriental Z.
