@@ -39,26 +39,26 @@ def register():
         password = request.form.get("password")
         confirm = request.form.get("confirmation")
         hash = generate_password_hash(password)
-        try:
-            rows = cr.execute("SELECT * FROM users WHERE username = ?", [name])
-            if rows.fetchone() is not None:
-                flash("That username is already taken...")
-                return render_template("register.html")
-            elif password != confirm:
-                flash("passwords doesn't match")
-            else:
+        rows = cr.execute("SELECT * FROM users WHERE username = ?", [name])
+        rw = rows.fetchone()
+        if not rw:
+            try:
                 cr.execute("INSERT INTO users (username, hash) VALUES (?, ?)", (name, hash))
                 db.commit()
-                flash(...)
-        except:
-            db.rollback()
-        finally:
-            session["logged_in"] = True
-            nm = cr.execute("SELECT id FROM users WHERE username = ?", [name])
-            rr = nm.fetchone()
-            session["user_id"] = int(rr["id"])
-            session["events"] = ""
-            return redirect("/")
+                session["logged_in"] = True
+                nm = cr.execute("SELECT id FROM users WHERE username = ?", [name])
+                rr = nm.fetchone()
+                session["user_id"] = int(rr["id"])
+                session["events"] = ""
+            except:
+                db.rollback()
+                x = f"something went wrong"
+                return render_template("log.html", x = x)
+            finally:
+                return redirect("/")
+        else:
+            x = f"That username is already taken..."
+            return render_template("log.html", x = x)
         
     else:
         return render_template("register.html")
@@ -89,7 +89,7 @@ def login():
         )
         # Ensure username exists and password is correct
         rw = rows.fetchone()
-        if not len(rw):
+        if not rw:
             return apology("user not found", 403)
         if not check_password_hash(rw["hash"], request.form.get("password")):
             return apology("pass don't match", 403)
@@ -119,12 +119,12 @@ def events():
         hash = generate_password_hash(ps)
         cmd = f"CREATE TABLE IF NOT EXISTS {en} (user TEXT UNIQUE NOT NULL, pref1 INTEGER DEFAULT 0, pref2 INTEGER DEFAULT 0, pref3 INTEGER DEFAULT 0, FOREIGN KEY (pref1) REFERENCES users(id), FOREIGN KEY (pref2) REFERENCES users(id), FOREIGN KEY (pref3) REFERENCES users(id), FOREIGN KEY (user) REFERENCES users(username))"
         cr.execute(cmd)
-        date = datetime.now().strftime("%Y-%m-%d")
-        cr.execute("INSERT INTO tables (events, hash, date) VALUES (?, ?)", (en, hash, date))
+        date = datetime.datetime.now().strftime("%Y-%m-%d")
+        cr.execute("INSERT INTO tables (events, hash, date) VALUES (?, ?, ?)", (en, hash, date))
         db.commit()
         return redirect("/events")
     else:
-        llst = cr.execute("SELECT events FROM tables")
+        llst = cr.execute("SELECT events, date FROM tables")
         lst = llst.fetchall()
         return render_template("events.html", lst = lst)
 
@@ -152,7 +152,8 @@ def event(var):
                     acmd = f"UPDATE {var} SET pref{i} = {prf3} WHERE user = '{usr}'"                
                 cr.execute(acmd)
                 db.commit()
-            return "submitted!"
+                x = f"submitted!"
+            return render_template("log.html", x = x)
         else:
             ps = request.form.get("password")
             llst = cr.execute("SELECT hash FROM tables WHERE events = ?", [var])
@@ -167,7 +168,7 @@ def event(var):
                 try:
                     cr.execute(ckcmd)
                 except sqlite3.OperationalError:
-                    print("snap! user does not exist")
+                    print(f"snap! {nm} does not exist")
                     cmnd = f"INSERT INTO {var} (user) VALUES ('{nm}')"
                     cr.execute(cmnd)
                     db.commit()
@@ -175,7 +176,8 @@ def event(var):
                     session["events"] = var
                     return redirect("/events")
             else:
-                return "password don't match!"
+                x = f"password don't match!"
+                return render_template("log.html", x = x)
     else:
         if session["events"] == var:
             cmd = f"SELECT user, id FROM {var} JOIN users ON user = username"
@@ -190,7 +192,7 @@ def event(var):
 def result():
     llst = cr.execute("SELECT events, date FROM tables")
     lst = llst.fetchall()
-    td = datetime.now().strftime("%Y-%m-%d")
+    td = datetime.datetime.now().strftime("%Y-%m-%d")
     return render_template("result.html", lst = lst, td = td)
     
 @app.route("/result/<var>")

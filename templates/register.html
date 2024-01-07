@@ -4,6 +4,10 @@
     Register
 {% endblock %}
 
+{% block head %}
+    <script src="/static/jquery.js"></script>
+{% endblock %}
+
 {% block main %}
 
     <form action="/register" method="post">
@@ -11,12 +15,13 @@
             <input name="username" type="text" placeholder="Username" class="form-control mx-auto w-auto" autofocus>
         </div>
         <div class="mb-3">
-            <input name="password" type="text" placeholder="Password" class="form-control mx-auto w-auto">
+            <input name="password" id="2" type="text" placeholder="Password" class="form-control mx-auto w-auto">
         </div>
         <div class="mb-3">
-            <input name="confirmation" type="text" placeholder="Confirm password" class="form-control mx-auto w-auto">
+            <input name="confirmation" id="3" type="text" placeholder="Confirm password" class="form-control mx-auto w-auto"
+            onblur="dnMatch()">
         </div>
         <button class="btn btn-primary" type="submit">Register</button>
     </form>
-
+    <script src="/static/register.js"></script>
 {% endblock %}

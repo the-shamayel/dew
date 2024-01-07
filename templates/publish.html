@@ -3,5 +3,8 @@
 {% block title %}{{ var }} Result{% endblock %}
 
 {% block main %}
-    The Elected person is : {{ x }}
+    {% if session["events"] == var %}
+        <p>The Elected person is : {{ x }}</p>
+    {% else %}
+        <p>You did not participate in this Event</p>
 {% endblock %}

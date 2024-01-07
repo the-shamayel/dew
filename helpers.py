@@ -77,5 +77,4 @@ def get_winner(locked_pairs):
     # Find the candidate with zero indegree (no incoming edges)
     for candidate, indegree in indegrees.items():
         if indegree == 0:
-            print(candidate)
             return candidate

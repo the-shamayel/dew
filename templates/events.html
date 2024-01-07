@@ -11,12 +11,14 @@
             <thead>
                 <tr>
                     <th class="text-start">Event Title</th>
+                    <th class="text-end">Created On</th>
                 </tr>
             </thead>
             <tbody>
                 {% for rows in lst %}
                     <tr>
                         <td class="text-start"><a href="/dew/{{ rows.events }}">{{ rows.events }}</a></td>
+                        <td class="text-end">{{ rows.date }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
