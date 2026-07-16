@@ -1,44 +1,81 @@
-from flask import session, redirect, render_template
+import os
+from flask import session, jsonify
 from functools import wraps
-from jsonify import convert
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
-import sqlite3
+def get_db_connection():
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        db_url = "postgresql://postgres:postgres@localhost:5432/postgres" # Default for local dev/testing
+    conn = psycopg2.connect(db_url, cursor_factory=RealDictCursor)
+    return conn
 
 def login_required(f):
     @wraps(f)
     def lr(*args, **kwargs):
         if session.get("user_id") is None:
-            return redirect("/login")
+            return jsonify({"error": "Unauthorized"}), 401
         return f(*args, **kwargs)
     return lr
 
 def apology(message, code=400):
-    def escape(s):
-        for old, new in [("-", "--"), (" ", "-"), ("_", "__"), ("?", "~q"),
-                         ("%", "~p"), ("#", "~h"), ("/", "~s"), ("\"", "''")]:
-            s = s.replace(old, new)
-        return s
-    return render_template("apology.html", top = code, bottom = escape(message)), code
+    return jsonify({"error": message}), code
 
-def tideman(var):
-    db = sqlite3.connect("db.db", check_same_thread = False)
-    cr = db.cursor()
-    cmd = f"SELECT * FROM {var}"
-    preferences = cr.execute(cmd)
-    pairs = record_preferences(preferences)
+def tideman(event_id):
+    conn = get_db_connection()
+    cr = conn.cursor()
+
+    # Get votes for the specific event
+    cmd = "SELECT pref1, pref2, pref3 FROM votes WHERE event_id = %s"
+    cr.execute(cmd, (event_id,))
+    preferences = cr.fetchall()
+
+    if not preferences:
+        return None
+
+    # Convert RealDictRow objects to tuples of values, handling potentially NULL preferences
+    clean_preferences = []
+    for pref in preferences:
+        clean_pref = []
+        if pref['pref1'] is not None:
+            clean_pref.append(pref['pref1'])
+        if pref['pref2'] is not None:
+            clean_pref.append(pref['pref2'])
+        if pref['pref3'] is not None:
+            clean_pref.append(pref['pref3'])
+        if clean_pref:
+             clean_preferences.append(clean_pref)
+
+    pairs = record_preferences(clean_preferences)
+    if not pairs:
+        return None
+
     locked_pairs = create_locked_pairs(pairs)
-    winners = get_winner(locked_pairs)
-    kmd = f"SELECT username FROM users WHERE id = {winners[0]}"
-    wr = cr.execute(kmd)
-    winner = wr.fetchone()
-    return winner[0]
+    winner_id = get_winner(locked_pairs)
+
+    if winner_id is None:
+        return None
+
+    # Get winner's username
+    kmd = "SELECT username FROM users WHERE id = %s"
+    cr.execute(kmd, (winner_id,))
+    winner = cr.fetchone()
+
+    cr.close()
+    conn.close()
+
+    if winner:
+        return winner['username']
+    return None
 
 def record_preferences(preferences):
     # Create a dictionary to store pairwise preferences
     pairs = {}
     for voter in preferences:
-        for i in range(1, 2):
-            for j in range(i + 1, 3):
+        n = len(voter)
+        for i in range(n):
+            for j in range(i + 1, n):
                 pair = (voter[i], voter[j])
                 pairs[pair] = pairs.get(pair, 0) + 1
     return pairs
@@ -48,7 +85,8 @@ def create_locked_pairs(pairs):
     locked_pairs = []
     # Sort pairs in descending order of strength
     sorted_pairs = sorted(pairs.items(), key=lambda x: x[1], reverse=True)
-    for winner, loser in sorted_pairs:
+    for pair, strength in sorted_pairs:
+        winner, loser = pair
         if not has_cycle(locked_pairs, winner, loser):
             locked_pairs.append((winner, loser))
     return locked_pairs
@@ -70,11 +108,25 @@ def has_path(locked_pairs, start, end, visited):
 
 def get_winner(locked_pairs):
     # Create a dictionary to store indegrees (number of incoming edges)
-    indegrees = {candidate: 0 for pair in locked_pairs for candidate in pair}
+    # Ensure all candidates mentioned in pairs are in indegrees
+    candidates = set()
+    for winner, loser in locked_pairs:
+        candidates.add(winner)
+        candidates.add(loser)
+
+    indegrees = {candidate: 0 for candidate in candidates}
     # Update indegrees based on locked pairs
     for winner, loser in locked_pairs:
         indegrees[loser] += 1
+
     # Find the candidate with zero indegree (no incoming edges)
+    winners = []
     for candidate, indegree in indegrees.items():
         if indegree == 0:
-            return candidate
+            winners.append(candidate)
+
+    # For simplicity, returning the first winner if there's a tie,
+    # though true Tideman should not have a cycle at the source
+    if winners:
+         return winners[0]
+    return None
