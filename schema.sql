@@ -1,0 +1,34 @@
+DROP TABLE IF EXISTS votes CASCADE;
+DROP TABLE IF EXISTS event_participants CASCADE;
+DROP TABLE IF EXISTS events CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    hash VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE events (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    hash VARCHAR(255) NOT NULL,
+    date DATE NOT NULL
+);
+
+CREATE TABLE event_participants (
+    id SERIAL PRIMARY KEY,
+    event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(event_id, user_id)
+);
+
+CREATE TABLE votes (
+    id SERIAL PRIMARY KEY,
+    event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    pref1 INTEGER REFERENCES users(id),
+    pref2 INTEGER REFERENCES users(id),
+    pref3 INTEGER REFERENCES users(id),
+    UNIQUE(event_id, user_id)
+);
