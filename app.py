@@ -15,6 +15,9 @@ app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key")
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+# Use /tmp for session files on serverless platforms (like Vercel) which have a read-only filesystem
+app.config["SESSION_FILE_DIR"] = "/tmp/flask_session"
+os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 
 @app.after_request
